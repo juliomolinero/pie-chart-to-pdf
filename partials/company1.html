@@ -1,0 +1,110 @@
+<script type="text/javascript">
+// showpie chart
+$("#piechart").removeClass('hidden');
+$("#save-pdf").removeClass('invisible');
+
+dataChart = [ ["Status", "Total"],
+	["Assigned (2)", 2],
+	["Open (3)", 3],
+	["Pending (1)", 1],
+	["WIP (4)", 4]
+];
+
+//Load google charts
+google.charts.load('current', {'packages':['corechart']});
+google.charts.setOnLoadCallback(drawChart);
+
+</script>
+<br/>
+<table class="table table-hover" id="tblTickets">
+	<tbody>	
+		<tr>			
+			<th>Company</th>
+			<th>Date Created</th>
+			<th>Ticket Number</th>			
+			<th>Priority</th>
+			<th>Status</th>			
+			<th>Short Description</th>
+		</tr>	
+		<tr>
+			<td>Company 1</td>
+			<td>2017-02-28 11:20:19</td>
+			<td>IM0000000000028</td>			
+			<td>4</td>
+			<td>Assigned</td>			
+			<td>CURL IS NOT WORKING</td>
+		</tr>
+		<tr>
+			<td>Company 1</td>
+			<td>2017-02-15 12:06:27</td>
+			<td>IM0000000000019</td>			
+			<td>1</td>
+			<td>Assigned</td>			
+			<td>NEED A REPLACEMENT QUICKLY !</td>
+		</tr>
+		<tr>
+			<td>Company 1</td>
+			<td>2017-02-15 12:07:59</td>
+			<td>IM0000000000020</td>			
+			<td>1</td>
+			<td>Open</td>			
+			<td>NEED A REPLACEMENT QUICKLY !</td>
+		</tr>
+		<tr>
+			<td>Company 1</td>
+			<td>2017-02-15 01:07:15</td>
+			<td>IM0000000000022</td>			
+			<td>1</td>
+			<td>Open</td>			
+			<td>NEED A REPLACEMENT QUICKLY !</td>
+		</tr>
+		<tr>
+			<td>Company 1</td>
+			<td>2017-02-15 01:47:20</td>
+			<td>IM0000000000023</td>			
+			<td>4</td>
+			<td>Open</td>			
+			<td>Application is not working</td>
+		</tr>
+		<tr>
+			<td>Company 1</td>
+			<td>2017-04-25 01:04:39</td>
+			<td>IM0000000000031</td>			
+			<td>3</td>
+			<td>Pending</td>			
+			<td>Can't print my name</td>
+		</tr>
+		<tr>
+			<td>Company 1</td>
+			<td>2017-05-23 01:44:31</td>
+			<td>IM0000000000032</td>			
+			<td>4</td>
+			<td>WIP</td>			
+			<td>Testing location and manufacturer</td>
+		</tr>
+		<tr>
+			<td>Company 1</td>
+			<td>2017-09-28 11:16:53</td>
+			<td>IM0000000000033</td>			
+			<td>4</td>
+			<td>WIP</td>			
+			<td>Parts issue</td>
+		</tr>
+		<tr>
+			<td>Company 1</td>
+			<td>2018-04-12 11:30:22</td>
+			<td>SL0000000000034</td>			
+			<td>4</td>
+			<td>WIP</td>			
+			<td>Short Description</td>
+		</tr>
+		<tr>
+			<td>Company 1</td>
+			<td>2017-02-14 04:03:15</td>
+			<td>SL0000000000011</td>			
+			<td>1</td>
+			<td>WIP</td>			
+			<td>NEED A REPLACEMENT QUICKLY ! - UPDATED!!!</td>
+		</tr>		
+	</tbody>	
+</table>

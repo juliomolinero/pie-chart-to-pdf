@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+		
+		<!-- Use font awesome instead of glyphicons -->
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+        
+        <!-- Google Charts Library -->
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>        
+        
+        <!-- jsPDF Library -->
+        <script src="js/jspdf.1.3.5.js"></script>
+        
+        <!-- jsPDF Autotable Library -->
+        <script src="js/jspdf.1.3.5.autotable.js"></script>
+        
+        <!-- Waiting dialog -->
+        <script src="js/waiting.dialog.js"></script>
+
+<style type="text/css">
+<!--
+.list-pointer{
+	cursor: pointer;
+}
+-->
+</style>
+<script type="text/javascript">
+// Define what partials to load
+var partials = [ "company1.html", "company2.html", "company3.html", "company4.html" ];
+// The array that will store data chart
+var dataChart = [];
+
+function getTickets( option ){
+	waitingDialog.show();
+	//console.log( partials[option-1] );
+	// remove active class first
+	$("[id^=list-item-]").each(function() {
+		var id = $(this).val();
+		var li = "#list-item-"+id;			
+		$(li).removeClass("active");					
+	});
+	// mark current as active
+	var list = "#list-item-" + option;
+	$(list).addClass("active");
+	// Load partial into div
+	var url = "partials/" + partials[option-1];
+	console.log(url);
+	$("#divTickets").load( url );
+	setTimeout(function () {waitingDialog.hide();}, 1000);
+}
+</script>
+<script type="text/javascript">
+// Draw the chart and set the chart values
+function drawChart() {
+	//console.log(dataChart);
+    var data = google.visualization.arrayToDataTable( dataChart );
+    // Define color by status
+    var colors = { Open:'yellow', Assigned:'orange', Pending:'blue', WIP:'green' };
+    // build slices
+    var slices = [];
+    for (var i = 0; i < data.getNumberOfRows(); i++) {
+        slices.push({
+          color: colors[data.getValue(i, 0)]
+        });
+      };
+    
+    // Optional; add a title and set the width and height of the chart
+    // https://developers.google.com/chart/interactive/docs/gallery/piechart#configuration-options    
+    var options = { 'title':'Tickets by Status', is3D: true, slices:slices, chartArea:{ height:'80%' }, 
+    	    legend:{ position:'right', alignment:'center' }, };
+    
+    // Display the chart inside the <div> element with id="piechart"
+    var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+    var btnSave = document.getElementById('save-pdf');
+
+    google.visualization.events.addListener(chart, 'ready', function () {        
+        btnSave.disabled = false;
+        $("#save-pdf").removeClass('hidden');
+      });
+
+    btnSave.addEventListener('click', function () {
+    	btnSave.disabled = true;
+    	waitingDialog.show('Exporting data please wait...');    	        
+		// https://github.com/simonbengtsson/jsPDF-AutoTable, see Usage section		
+    	var doc = new jsPDF( 'p', 'pt', 'letter' );
+    	var elem = document.getElementById("tblTickets");
+
+    	var totalPagesExp = "{total_pages_count_string}";
+        var pageContent = function (data) {
+            // HEADER            
+        	doc.addImage(chart.getImageURI(), 50, 10);            
+            // FOOTER
+            var str = "Page " + data.pageCount;
+            // Total page number plugin only available in jspdf v1.0+
+            if (typeof doc.putTotalPages === 'function') {
+                str = str + " of " + totalPagesExp;
+            }
+            doc.setFontSize(6);
+            var pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+            doc.text(str, data.settings.margin.left, pageHeight  - 10);
+    	};    	
+    	var res = doc.autoTableHtmlToJson(elem);
+    	//doc.addImage(chart.getImageURI(), 20, 10);
+    	doc.setFontSize(6);
+    	doc.autoTable( res.columns, res.data, { addPageContent:pageContent, theme:'striped',    		
+        	margin:{top:238, right:5, bottom:15, left:20}, bodyStyles:{fontSize:8, valign:'top'}, 
+        	styles:{overflow:'linebreak', columnWidth:'wrap'}, columnStyles:{ text:{columnWidth:'auto'} } 
+        });
+    	// Total page number plugin only available in jspdf v1.0+
+        if (typeof doc.putTotalPages === 'function') {
+            doc.putTotalPages(totalPagesExp);
+    	}        
+    	doc.save('Tickets.pdf');
+    	setTimeout(function () {waitingDialog.hide();}, 3000);
+    	btnSave.disabled = false;		
+    });    
+    chart.draw(data, options);
+}
+</script>        
+
+<title>Tickets</title>
+</head>
+<body>
+<div class="container">
+	<nav class="navbar navbar-expand-md bg-dark navbar-dark">
+        <!-- Brand -->
+        <a class="navbar-brand" href="#">
+        	<span>Your Logo Here</span>
+		</a>
+	</nav>
+	<br/>
+	<div class="row">
+		<div class="col-md-7">
+			<div class="text-center" id="piechart" style="height: 300px;"></div>
+        	<div class="pull-right">
+        		<button class="btn btn-primary invisible" id="save-pdf" type="button"><span class="glyphicon glyphicon-download-alt"></span> Export to PDF</button>        			        			        			
+        	</div>        		        		        		
+        </div><!-- ./ the graph -->
+        <div class="col-md-5" style="overflow: auto; max-height: 390px;">
+        	<ul class="list-group">
+        		<li class="list-pointer list-group-item d-flex justify-content-between" id="list-item-1" onclick="getTickets(1);" value="1">Company 1<span class="badge badge-danger badge-pill">10</span></li>
+            	<li class="list-pointer list-group-item d-flex justify-content-between" id="list-item-2" onclick="getTickets(2);" value="2">Company 2<span class="badge badge-danger badge-pill">7</span></li>
+            	<li class="list-pointer list-group-item d-flex justify-content-between" id="list-item-3" onclick="getTickets(3);" value="3">Company 3<span class="badge badge-danger badge-pill">5</span></li>
+            	<li class="list-pointer list-group-item d-flex justify-content-between" id="list-item-4" onclick="getTickets(4);" value="4">Company 4<span class="badge badge-danger badge-pill">11</span></li>    
+    		</ul>    			
+        </div><!-- ./ companies -->
+	</div><!-- ./ Chart and company list div -->
+    <div class="row">
+    	<div id="divTickets" class="col-md-12"></div><!-- ./ divTickets -->
+    </div><!-- ./ tickets reports -->        
+	
+</div><!-- ./ container -->
+</body>
+</html>
